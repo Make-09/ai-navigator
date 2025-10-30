@@ -1,0 +1,1 @@
+# AI Navigator\n\nAI-наставник для школьников Казахстана\n\n## Запуск\n1. pip install -r requirements.txt\n2. Добавьте OPENAI_API_KEY в .env\n3. python app.py

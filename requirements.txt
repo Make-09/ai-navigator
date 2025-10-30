@@ -1,0 +1,1 @@
+flask==3.0.0\nflask-cors==4.0.0\nopenai==1.40.6\ngunicorn==21.2.0\npython-dotenv==1.0.0

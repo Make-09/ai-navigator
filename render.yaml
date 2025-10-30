@@ -1,0 +1,1 @@
+services:\n  - type: web\n    name: ai-navigator\n    runtime: python\n    buildCommand: pip install -r requirements.txt\n    startCommand: gunicorn app:app
