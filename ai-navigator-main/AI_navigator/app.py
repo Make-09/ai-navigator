@@ -4,23 +4,21 @@ from openai import OpenAI
 from markupsafe import escape
 
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
 
 if not OPENAI_KEY:
     raise RuntimeError("OPENAI_API_KEY не задан.")
-if not SECRET_KEY:
-    SECRET_KEY = "dev-secret"
-    print("⚠️ Warning: SECRET_KEY не задан — используется dev-secret.")
 
-client = OpenAI(api_key=OPENAI_KEY)
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = SECRET_KEY
+
+client = OpenAI(api_key=OPENAI_KEY)
 
 MAX_MESSAGE_LENGTH = 2000
 MAX_HISTORY_MESSAGES = 10
 SYSTEM_PROMPT = (
-    "Ты AI-навигатор по образованию и карьере. "
-    "Отвечай чётко и по существу, используй списки и примеры."
+    "Ты — AI-навигатор по образованию и карьере. "
+    "Отвечай чётко, структурированно, используй списки и примеры."
 )
 
 def get_history():
@@ -54,8 +52,6 @@ def chat():
     user_message = escape(data["message"].strip())
     if not user_message:
         return jsonify({"error": "Пустое сообщение"}), 400
-    if len(user_message) > MAX_MESSAGE_LENGTH:
-        user_message = user_message[:MAX_MESSAGE_LENGTH]
 
     history = get_history()
     history.append({"role": "user", "content": user_message})
@@ -81,5 +77,5 @@ def clear():
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
