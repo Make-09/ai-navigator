@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}AI Navigator{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+  <nav class="topbar">
+    <div class="brand"><a href="{{ url_for('home') }}">AI Navigator</a></div>
+    <div class="controls">
+      <select id="lang-select" class="lang-select"></select>
+      <button id="theme-toggle">🌙</button>
+      <a href="{{ url_for('about') }}" class="nav-link" data-i18n="nav_about">О нас</a>
+      <a href="{{ url_for('faq') }}" class="nav-link" data-i18n="nav_faq">FAQ</a>
+      <a href="{{ url_for('policy') }}" class="nav-link" data-i18n="nav_policy">Политика</a>
+    </div>
+  </nav>
+
+  {% block content %}{% endblock %}
+
+  <footer class="site-footer">
+    <span data-i18n="footer_copyright">© AI Navigator — школьники из Шымкента и Уральска</span>
+    <span data-i18n="footer_support">Поддержка — скоро</span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='lang.js') }}"></script>
+  <script src="{{ url_for('static', filename='nav.js') }}"></script>
+  <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

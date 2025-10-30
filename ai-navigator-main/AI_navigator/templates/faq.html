@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FAQ — AI Navigator</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <header>
-    <h1>FAQ</h1>
-    <nav>
-      <a href="/">Главная</a>
-      <a href="/about">О нас</a>
-      <a href="/policy">Политика</a>
-    </nav>
-  </header>
+{% extends "base.html" %}
+{% block title %}FAQ — AI Navigator{% endblock %}
+{% block content %}
+<main class="content-page">
+  <h1 data-i18n="nav_faq">FAQ</h1>
+  <h2>Часто задаваемые вопросы</h2>
 
-  <main>
-    <h2>Часто задаваемые вопросы</h2>
-    <p><strong>Как работает сайт?</strong> — AI анализирует ваш вопрос и предлагает направления и советы.</p>
-    <p><strong>Нужна ли регистрация?</strong> — Нет, всё работает без личных данных.</p>
-    <p><strong>Какие языки поддерживаются?</strong> — Казахский, Русский, Английский, Китайский, Японский и Корейский.</p>
-  </main>
-</body>
-</html>
+  <p><strong>Как работает сайт?</strong><br>
+  AI анализирует ваш вопрос и предлагает направления, советы и идеи для будущего обучения или карьеры.</p>
+
+  <p><strong>Нужна ли регистрация?</strong><br>
+  Нет, мы не собираем личные данные. Всё хранится только в вашей сессии браузера.</p>
+
+  <p><strong>Какие языки поддерживаются?</strong><br>
+  Русский, Казахский, Английский, Китайский, Японский и Корейский.</p>
+
+  <p><strong>Можно ли использовать с телефона?</strong><br>
+  Да, сайт полностью адаптирован под мобильные устройства.</p>
+</main>
+{% endblock %}

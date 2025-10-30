@@ -1,27 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>О нас — AI Navigator</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <header>
-    <h1>О нас</h1>
-    <nav>
-      <a href="/">Главная</a>
-      <a href="/faq">FAQ</a>
-      <a href="/policy">Политика</a>
-    </nav>
-  </header>
-
-  <main>
-    <p>
-      Мы — 10-классники из Казахстана (Шымкент и Уральск). Создали сайт <strong>AI Navigator</strong>,
-      чтобы помочь школьникам, которые не знают, что делать в 10 классе: остаться, поступать
-      или искать путь за границей.
-    </p>
-  </main>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}О нас — AI Navigator{% endblock %}
+{% block content %}
+<main class="content-page">
+  <h1>О нас</h1>
+  <p>Мы — 10-классники из Казахстана (Шымкент и Уральск). Создали сайт <b>AI Navigator</b>, чтобы помочь школьникам определиться с направлением, поступлением и карьерой.</p>
+</main>
+{% endblock %}

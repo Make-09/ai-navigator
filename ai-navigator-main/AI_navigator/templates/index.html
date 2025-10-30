@@ -1,34 +1,18 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Navigator — персональный AI-наставник по карьере</title>
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <header>
-    <h1>AI Life Path Navigator</h1>
-    <p>Персональный AI-наставник по образованию и карьере</p>
-    <nav>
-      <a href="/">Главная</a>
-      <a href="/about">О нас</a>
-      <a href="/faq">FAQ</a>
-      <a href="/policy">Политика</a>
-    </nav>
-  </header>
+{% extends "base.html" %}
+{% block title %}Главная — AI Navigator{% endblock %}
+{% block content %}
+<main class="content-page">
+  <h1>AI Life Path Navigator</h1>
+  <p>Персональный AI-наставник по образованию и карьере</p>
 
   <div id="chat-box" class="chat-box"></div>
 
   <div class="input-area">
-    <textarea id="user-input" placeholder="Напишите ваш вопрос..." rows="1"></textarea>
+    <textarea id="user-input" placeholder="Напишите ваш вопрос..."></textarea>
     <button id="send-btn">➤</button>
     <button id="clear-btn">✖</button>
   </div>
 
-  <script src="{{ url_for('static', filename='theme.js') }}"></script>
-  <script src="{{ url_for('static', filename='lang.js') }}"></script>
   <script>
     async function sendMessage() {
       const input = document.getElementById("user-input");
@@ -36,28 +20,29 @@
       if (!msg) return;
       input.value = "";
 
-      const el = document.createElement("div");
-      el.textContent = msg;
-      el.className = "message user";
-      document.getElementById("chat-box").appendChild(el);
+      const userEl = document.createElement("div");
+      userEl.className = "message user";
+      userEl.textContent = msg;
+      document.getElementById("chat-box").appendChild(userEl);
 
       const res = await fetch("/chat", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: msg})
+        body: JSON.stringify({ message: msg })
       });
       const data = await res.json();
+
       const botEl = document.createElement("div");
-      botEl.textContent = data.reply || data.error || "Ошибка.";
       botEl.className = "message bot";
+      botEl.textContent = data.reply || data.error || "Ошибка AI.";
       document.getElementById("chat-box").appendChild(botEl);
     }
 
     document.getElementById("send-btn").onclick = sendMessage;
-    document.getElementById("clear-btn").onclick = () => {
-      fetch("/clear", {method: "POST"});
+    document.getElementById("clear-btn").onclick = async () => {
+      await fetch("/clear", { method: "POST" });
       document.getElementById("chat-box").innerHTML = "";
     };
   </script>
-</body>
-</html>
+</main>
+{% endblock %}
