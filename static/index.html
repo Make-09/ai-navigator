@@ -233,13 +233,6 @@
         }
       };
 
-      // Обновление текущего чата
-      const updateCurrentChat = (updater) => {
-        saveChats(chats.map(chat => 
-          chat.id === currentChatId ? updater(chat) : chat
-        ));
-      };
-
       // Отправка сообщения
       const sendMessage = async () => {
         if (!input.trim() || loading) return;
@@ -259,21 +252,25 @@
           id: Date.now() 
         };
         
-        updateCurrentChat(chat => ({
-          ...chat,
-          messages: [...chat.messages, newUserMsg]
-        }));
+        // Обновляем чаты с новым сообщением пользователя
+        const updatedChatsWithUser = chats.map(chat => 
+          chat.id === chatId 
+            ? { ...chat, messages: [...chat.messages, newUserMsg] }
+            : chat
+        );
+        saveChats(updatedChatsWithUser);
 
         setLoading(true);
 
         try {
-          // Получаем текущую историю
-          const currentChat = chats.find(c => c.id === chatId);
+          // Получаем ОБНОВЛЕННУЮ историю (с новым сообщением пользователя)
+          const currentChat = updatedChatsWithUser.find(c => c.id === chatId);
           const history = currentChat ? currentChat.messages : [];
 
           console.log('📤 Отправка запроса...', { 
             chatId, 
-            historyLength: history.length 
+            historyLength: history.length,
+            lastMessage: history[history.length - 1]?.content?.substring(0, 50)
           });
 
           // Отправляем запрос
@@ -297,30 +294,38 @@
           }
 
           const data = await res.json();
-          console.log('✅ Получен ответ');
+          console.log('✅ Получен ответ, длина:', data.reply?.length);
 
           // Добавляем ответ AI
-          updateCurrentChat(chat => ({
-            ...chat,
-            messages: [...chat.messages, {
-              role: 'assistant',
-              content: data.reply,
-              id: Date.now() + 1
-            }]
-          }));
+          const aiMsg = {
+            role: 'assistant',
+            content: data.reply,
+            id: Date.now() + 1
+          };
+
+          const updatedChatsWithAI = updatedChatsWithUser.map(chat => 
+            chat.id === chatId 
+              ? { ...chat, messages: [...chat.messages, aiMsg] }
+              : chat
+          );
+          saveChats(updatedChatsWithAI);
 
         } catch (error) {
           console.error('❌ Ошибка:', error);
           
           // Показываем ошибку в чате
-          updateCurrentChat(chat => ({
-            ...chat,
-            messages: [...chat.messages, {
-              role: 'assistant',
-              content: `${t.error}: ${error.message}`,
-              id: Date.now() + 1
-            }]
-          }));
+          const errorMsg = {
+            role: 'assistant',
+            content: `${t.error}: ${error.message}`,
+            id: Date.now() + 1
+          };
+
+          const updatedChatsWithError = updatedChatsWithUser.map(chat => 
+            chat.id === chatId 
+              ? { ...chat, messages: [...chat.messages, errorMsg] }
+              : chat
+          );
+          saveChats(updatedChatsWithError);
         } finally {
           setLoading(false);
         }
