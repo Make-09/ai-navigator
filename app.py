@@ -90,8 +90,9 @@ def chat():
                     "content": msg["content"]
                 })
         
-        # Добавляем текущее сообщение пользователя
-        messages.append({"role": "user", "content": user_message})
+        # Добавляем текущее сообщение пользователя (если его еще нет в истории)
+        if not chat_history or chat_history[-1].get("content") != user_message:
+            messages.append({"role": "user", "content": user_message})
         
         print(f"📤 Отправка запроса в OpenAI (история: {len(messages)} сообщений)")
         
@@ -108,8 +109,9 @@ def chat():
         bot_reply = response.choices[0].message.content
         
         print(f"📥 Получен ответ от OpenAI ({len(bot_reply)} символов)")
+        print(f"📝 Первые 100 символов ответа: {bot_reply[:100]}")
         
-        return jsonify({"reply": bot_reply})
+        return jsonify({"reply": bot_reply}), 200
     
     except Exception as e:
         error_msg = str(e)
