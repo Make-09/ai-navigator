@@ -2,37 +2,162 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>AI Navigator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Navigator - Навигатор по образованию</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; overflow: hidden; }
+    body { font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
     #root { width: 100%; height: 100vh; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      background: rgba(0,0,0,0.7); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 1000;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
+    
+    // Переводы для всех языков
     const LOCALES = {
-      ru: { code: "ru", name: "Русский", flag: "🇷🇺", strings: { title: "AI Navigator", subtitle: "AI-наставник", placeholder: "Ваш вопрос...", loading: "AI думает...", error: "Ошибка", newChat: "Новый чат", deleteChat: "Удалить", noChats: "Нет чатов", about: "О нас", policy: "Политика", copyright: "Школьники из Шымкента и Уральска", chatHistory: "История", aboutTitle: "О проекте", aboutText: "AI Navigator для школьников Казахстана", policyTitle: "Политика", policyText: "История хранится локально в браузере" }},
-      en: { code: "en", name: "English", flag: "🇬🇧", strings: { title: "AI Navigator", subtitle: "AI mentor", placeholder: "Your question...", loading: "AI thinking...", error: "Error", newChat: "New Chat", deleteChat: "Delete", noChats: "No chats", about: "About", policy: "Policy", copyright: "Students from Shymkent and Uralsk", chatHistory: "History", aboutTitle: "About", aboutText: "AI Navigator for Kazakhstan students", policyTitle: "Policy", policyText: "History stored locally" }},
-      kk: { code: "kk", name: "Қазақша", flag: "🇰🇿", strings: { title: "AI Navigator", subtitle: "AI-кеңесші", placeholder: "Сұрағыңыз...", loading: "AI ойлануда...", error: "Қате", newChat: "Жаңа чат", deleteChat: "Жою", noChats: "Чаттар жоқ", about: "Біз туралы", policy: "Саясат", copyright: "Шымкент және Орал оқушылары", chatHistory: "Тарих", aboutTitle: "Біз туралы", aboutText: "Қазақстан оқушыларына", policyTitle: "Саясат", policyText: "Тарих жергілікті сақталады" }},
-      ja: { code: "ja", name: "日本語", flag: "🇯🇵", strings: { title: "AI Navigator", subtitle: "AIメンター", placeholder: "質問...", loading: "AI思考中...", error: "エラー", newChat: "新規", deleteChat: "削除", noChats: "チャットなし", about: "について", policy: "ポリシー", copyright: "学生プロジェクト", chatHistory: "履歴", aboutTitle: "について", aboutText: "カザフスタンの学生向け", policyTitle: "ポリシー", policyText: "ローカル保存" }},
-      zh: { code: "zh", name: "中文", flag: "🇨🇳", strings: { title: "AI Navigator", subtitle: "AI导师", placeholder: "您的问题...", loading: "AI思考中...", error: "错误", newChat: "新对话", deleteChat: "删除", noChats: "无对话", about: "关于", policy: "政策", copyright: "学生项目", chatHistory: "历史", aboutTitle: "关于", aboutText: "为哈萨克斯坦学生", policyTitle: "政策", policyText: "本地存储" }},
-      ko: { code: "ko", name: "한국어", flag: "🇰🇷", strings: { title: "AI Navigator", subtitle: "AI멘토", placeholder: "질문...", loading: "AI생각중...", error: "오류", newChat: "새 채팅", deleteChat: "삭제", noChats: "채팅 없음", about: "소개", policy: "정책", copyright: "학생 프로젝트", chatHistory: "기록", aboutTitle: "소개", aboutText: "카자흐스탄 학생용", policyTitle: "정책", policyText: "로컬 저장" }}
+      ru: { 
+        code: "ru", 
+        name: "Русский", 
+        flag: "🇷🇺", 
+        strings: { 
+          title: "AI Navigator", 
+          subtitle: "AI-наставник по образованию и карьере", 
+          placeholder: "Напишите ваш вопрос...", 
+          loading: "AI думает...", 
+          error: "Ошибка", 
+          newChat: "Новый чат", 
+          deleteChat: "Удалить", 
+          noChats: "Нет чатов", 
+          about: "О проекте", 
+          policy: "Политика", 
+          copyright: "Создано школьниками из Шымкента и Уральска", 
+          chatHistory: "История чатов", 
+          aboutTitle: "О проекте AI Navigator", 
+          aboutText: "AI Navigator - это образовательный проект для школьников Казахстана.\n\nМы помогаем:\n• Выбрать профессию\n• Найти подходящий ВУЗ\n• Спланировать карьеру\n• Получить советы по образованию\n\nПроект создан школьниками для школьников!", 
+          policyTitle: "Политика конфиденциальности", 
+          policyText: "Ваша приватность важна для нас.\n\n• История чатов хранится только в вашем браузере\n• Мы не собираем личные данные\n• Сообщения отправляются только в OpenAI для генерации ответов\n• Вы можете удалить историю в любой момент" 
+        }
+      },
+      en: { 
+        code: "en", 
+        name: "English", 
+        flag: "🇬🇧", 
+        strings: { 
+          title: "AI Navigator", 
+          subtitle: "AI mentor for education and career", 
+          placeholder: "Write your question...", 
+          loading: "AI is thinking...", 
+          error: "Error", 
+          newChat: "New Chat", 
+          deleteChat: "Delete", 
+          noChats: "No chats", 
+          about: "About", 
+          policy: "Privacy", 
+          copyright: "Created by students from Shymkent and Uralsk", 
+          chatHistory: "Chat History", 
+          aboutTitle: "About AI Navigator", 
+          aboutText: "AI Navigator is an educational project for students in Kazakhstan.\n\nWe help:\n• Choose a profession\n• Find a suitable university\n• Plan your career\n• Get education advice\n\nCreated by students for students!", 
+          policyTitle: "Privacy Policy", 
+          policyText: "Your privacy matters.\n\n• Chat history is stored only in your browser\n• We don't collect personal data\n• Messages are sent only to OpenAI for responses\n• You can delete history anytime" 
+        }
+      },
+      kk: { 
+        code: "kk", 
+        name: "Қазақша", 
+        flag: "🇰🇿", 
+        strings: { 
+          title: "AI Navigator", 
+          subtitle: "Білім және мансап бойынша AI-кеңесші", 
+          placeholder: "Сұрағыңызды жазыңыз...", 
+          loading: "AI ойлануда...", 
+          error: "Қате", 
+          newChat: "Жаңа чат", 
+          deleteChat: "Жою", 
+          noChats: "Чаттар жоқ", 
+          about: "Жоба туралы", 
+          policy: "Саясат", 
+          copyright: "Шымкент және Орал оқушылары жасаған", 
+          chatHistory: "Чат тарихы", 
+          aboutTitle: "AI Navigator туралы", 
+          aboutText: "AI Navigator - Қазақстан оқушыларына арналған білім беру жобасы.\n\nБіз көмектесеміз:\n• Мамандық таңдауға\n• ЖОО табуға\n• Мансапты жоспарлауға\n• Білім туралы кеңес алуға\n\nОқушылар оқушыларға арнап жасаған!", 
+          policyTitle: "Құпиялық саясаты", 
+          policyText: "Сіздің құпиялылығыңыз маңызды.\n\n• Чат тарихы тек браузеріңізде сақталады\n• Біз жеке деректерді жинамаймыз\n• Хабарламалар тек OpenAI-ға жіберіледі\n• Тарихты кез келген уақытта жоюға болады" 
+        }
+      }
     };
 
+    // Компонент модального окна
     function Modal({ isOpen, onClose, title, content, isDark }) {
       if (!isOpen) return null;
+      
       const surface = isDark ? '#1e293b' : '#fff';
       const text = isDark ? '#e2e8f0' : '#0f172a';
-      return (<div className="modal-overlay" onClick={onClose}><div onClick={(e) => e.stopPropagation()} style={{ background: surface, borderRadius: 16, padding: '2rem', maxWidth: 600, width: '90%', maxHeight: '80vh', overflow: 'auto' }}><div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}><h2 style={{ fontSize: '1.5rem', color: text }}>{title}</h2><button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: text }}>✕</button></div><div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: text }}>{content}</div></div></div>);
+      
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            style={{ 
+              background: surface, 
+              borderRadius: 16, 
+              padding: '2rem', 
+              maxWidth: 600, 
+              width: '90%', 
+              maxHeight: '80vh', 
+              overflow: 'auto',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem', color: text, fontWeight: 600 }}>{title}</h2>
+              <button 
+                onClick={onClose} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  fontSize: '1.5rem', 
+                  cursor: 'pointer', 
+                  color: text,
+                  opacity: 0.6,
+                  transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.opacity = '1'}
+                onMouseLeave={(e) => e.target.style.opacity = '0.6'}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: text }}>
+              {content}
+            </div>
+          </div>
+        </div>
+      );
     }
 
+    // Главный компонент приложения
     function App() {
       const [locale, setLocale] = useState('ru');
       const [theme, setTheme] = useState('light');
@@ -44,101 +169,562 @@
       const [showAbout, setShowAbout] = useState(false);
       const [showPolicy, setShowPolicy] = useState(false);
       const chatRef = useRef(null);
+      
       const t = LOCALES[locale].strings;
 
+      // Загрузка данных при старте
       useEffect(() => {
-        setTheme(localStorage.getItem('theme') || 'light');
-        setLocale(localStorage.getItem('locale') || 'ru');
-        const saved = localStorage.getItem('chats');
-        if (saved) {
-          const parsedChats = JSON.parse(saved);
-          setChats(parsedChats);
-          if (parsedChats.length > 0) setCurrentChatId(parsedChats[0].id);
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedLocale = localStorage.getItem('locale') || 'ru';
+        const savedChats = localStorage.getItem('chats');
+        
+        setTheme(savedTheme);
+        setLocale(savedLocale);
+        
+        if (savedChats) {
+          try {
+            const parsedChats = JSON.parse(savedChats);
+            setChats(parsedChats);
+            if (parsedChats.length > 0) {
+              setCurrentChatId(parsedChats[0].id);
+            }
+          } catch (e) {
+            console.error('Ошибка загрузки чатов:', e);
+          }
         }
       }, []);
 
+      // Автоскролл при новых сообщениях
       useEffect(() => {
-        if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        if (chatRef.current) {
+          chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
       }, [chats, currentChatId]);
 
-      const saveChats = (updatedChats) => { localStorage.setItem('chats', JSON.stringify(updatedChats)); setChats(updatedChats); };
-      const createNewChat = () => { const newChat = { id: Date.now(), title: `${t.newChat} ${chats.length + 1}`, messages: [], createdAt: new Date().toISOString() }; saveChats([newChat, ...chats]); setCurrentChatId(newChat.id); };
-      const deleteChat = (chatId) => { const updatedChats = chats.filter(c => c.id !== chatId); saveChats(updatedChats); if (currentChatId === chatId) setCurrentChatId(updatedChats.length > 0 ? updatedChats[0].id : null); };
-      const updateCurrentChat = (updater) => { saveChats(chats.map(chat => chat.id === currentChatId ? updater(chat) : chat)); };
-
-      const sendMessage = async () => {
-        if (!input.trim() || loading) return;
-        if (!currentChatId) { createNewChat(); setTimeout(() => sendMessage(), 100); return; }
-        const userMsg = input.trim();
-        setInput('');
-        updateCurrentChat(chat => ({ ...chat, messages: [...chat.messages, { role: 'user', content: userMsg, id: Date.now() }] }));
-        setLoading(true);
+      // Сохранение чатов
+      const saveChats = (updatedChats) => {
         try {
-          const res = await fetch(window.location.origin + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ message: userMsg, chatId: currentChatId }) });
-          const data = await res.json();
-          updateCurrentChat(chat => ({ ...chat, messages: [...chat.messages, { role: 'assistant', content: data.reply || data.error, id: Date.now() + 1 }] }));
-        } catch (error) {
-          updateCurrentChat(chat => ({ ...chat, messages: [...chat.messages, { role: 'assistant', content: t.error, id: Date.now() + 1 }] }));
-        } finally { setLoading(false); }
+          localStorage.setItem('chats', JSON.stringify(updatedChats));
+          setChats(updatedChats);
+        } catch (e) {
+          console.error('Ошибка сохранения чатов:', e);
+        }
       };
 
-      const toggleTheme = () => { const newTheme = theme === 'dark' ? 'light' : 'dark'; setTheme(newTheme); localStorage.setItem('theme', newTheme); };
-      const changeLocale = (newLocale) => { setLocale(newLocale); localStorage.setItem('locale', newLocale); };
+      // Создание нового чата
+      const createNewChat = () => {
+        const newChat = {
+          id: Date.now(),
+          title: `${t.newChat} ${chats.length + 1}`,
+          messages: [],
+          createdAt: new Date().toISOString()
+        };
+        saveChats([newChat, ...chats]);
+        setCurrentChatId(newChat.id);
+        return newChat.id;
+      };
 
+      // Удаление чата
+      const deleteChat = (chatId) => {
+        const updatedChats = chats.filter(c => c.id !== chatId);
+        saveChats(updatedChats);
+        if (currentChatId === chatId) {
+          setCurrentChatId(updatedChats.length > 0 ? updatedChats[0].id : null);
+        }
+      };
+
+      // Обновление текущего чата
+      const updateCurrentChat = (updater) => {
+        saveChats(chats.map(chat => 
+          chat.id === currentChatId ? updater(chat) : chat
+        ));
+      };
+
+      // Отправка сообщения
+      const sendMessage = async () => {
+        if (!input.trim() || loading) return;
+
+        let chatId = currentChatId;
+        if (!chatId) {
+          chatId = createNewChat();
+        }
+
+        const userMsg = input.trim();
+        setInput('');
+
+        // Добавляем сообщение пользователя
+        const newUserMsg = { 
+          role: 'user', 
+          content: userMsg, 
+          id: Date.now() 
+        };
+        
+        updateCurrentChat(chat => ({
+          ...chat,
+          messages: [...chat.messages, newUserMsg]
+        }));
+
+        setLoading(true);
+
+        try {
+          // Получаем текущую историю
+          const currentChat = chats.find(c => c.id === chatId);
+          const history = currentChat ? currentChat.messages : [];
+
+          console.log('📤 Отправка запроса...', { 
+            chatId, 
+            historyLength: history.length 
+          });
+
+          // Отправляем запрос
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: userMsg,
+              chatId: chatId,
+              history: history
+            })
+          });
+
+          console.log('📥 Статус ответа:', res.status);
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || `HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          console.log('✅ Получен ответ');
+
+          // Добавляем ответ AI
+          updateCurrentChat(chat => ({
+            ...chat,
+            messages: [...chat.messages, {
+              role: 'assistant',
+              content: data.reply,
+              id: Date.now() + 1
+            }]
+          }));
+
+        } catch (error) {
+          console.error('❌ Ошибка:', error);
+          
+          // Показываем ошибку в чате
+          updateCurrentChat(chat => ({
+            ...chat,
+            messages: [...chat.messages, {
+              role: 'assistant',
+              content: `${t.error}: ${error.message}`,
+              id: Date.now() + 1
+            }]
+          }));
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      // Переключение темы
+      const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+      };
+
+      // Смена языка
+      const changeLocale = (newLocale) => {
+        setLocale(newLocale);
+        localStorage.setItem('locale', newLocale);
+      };
+
+      // Цветовая схема
       const isDark = theme === 'dark';
       const bg = isDark ? '#0f172a' : '#f8fafc';
       const surface = isDark ? '#1e293b' : '#fff';
       const text = isDark ? '#e2e8f0' : '#0f172a';
       const textSecondary = isDark ? '#94a3b8' : '#64748b';
       const border = isDark ? '#334155' : '#e2e8f0';
+      
       const currentChat = chats.find(c => c.id === currentChatId);
 
-      return (<div style={{ background: bg, height: '100vh', color: text, display: 'flex', flexDirection: 'column' }}>
-        <Modal isOpen={showAbout} onClose={() => setShowAbout(false)} title={t.aboutTitle} content={t.aboutText} isDark={isDark} />
-        <Modal isOpen={showPolicy} onClose={() => setShowPolicy(false)} title={t.policyTitle} content={t.policyText} isDark={isDark} />
-        <header style={{ padding: '1rem 1.5rem', borderBottom: `1px solid ${border}`, display: 'flex', justifyContent: 'space-between', background: surface }}>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: text, cursor: 'pointer', fontSize: '1.5rem' }}>☰</button>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>AI</div>
-              <div><div style={{ fontWeight: 600 }}>{t.title}</div><div style={{ fontSize: '0.75rem', color: textSecondary }}>{t.subtitle}</div></div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <select value={locale} onChange={(e) => changeLocale(e.target.value)} style={{ padding: '0.5rem', borderRadius: 8, border: `1px solid ${border}`, background: surface, color: text, cursor: 'pointer' }}>{Object.values(LOCALES).map(loc => <option key={loc.code} value={loc.code}>{loc.flag} {loc.name}</option>)}</select>
-            <button onClick={toggleTheme} style={{ padding: '0.5rem 1rem', borderRadius: 8, border: `1px solid ${border}`, background: surface, cursor: 'pointer' }}>{isDark ? '☀️' : '🌙'}</button>
-          </div>
-        </header>
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {sidebarOpen && <aside style={{ width: 280, background: surface, borderRight: `1px solid ${border}`, display: 'flex', flexDirection: 'column', padding: '1rem' }}>
-            <button onClick={createNewChat} style={{ padding: '0.75rem', borderRadius: 8, background: '#3b82f6', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600, marginBottom: '1rem' }}>+ {t.newChat}</button>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: textSecondary, marginBottom: '0.5rem', textTransform: 'uppercase' }}>{t.chatHistory}</div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>{chats.length === 0 ? <div style={{ textAlign: 'center', padding: '2rem 1rem', color: textSecondary }}>{t.noChats}</div> : chats.map(chat => <div key={chat.id} style={{ display: 'flex', gap: '0.5rem', padding: '0.75rem', marginBottom: '0.5rem', borderRadius: 8, background: currentChatId === chat.id ? (isDark ? '#334155' : '#f1f5f9') : 'transparent', cursor: 'pointer' }} onClick={() => setCurrentChatId(chat.id)}><div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{chat.messages.length > 0 ? chat.messages[0].content.substring(0, 30) + '...' : chat.title}</div><button onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>🗑️</button></div>)}</div>
-          </aside>}
-          <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div ref={chatRef} style={{ flex: 1, overflowY: 'auto', padding: '2rem', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-              {(!currentChat || currentChat.messages.length === 0) && <div style={{ textAlign: 'center', padding: '4rem 2rem', color: textSecondary }}><div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🧭</div><h2 style={{ color: text }}>{t.title}</h2><p>{t.subtitle}</p></div>}
-              {currentChat?.messages.map(msg => <div key={msg.id} style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}><div style={{ maxWidth: '75%', padding: '1rem 1.25rem', borderRadius: 16, background: msg.role === 'user' ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' : (isDark ? '#1e293b' : '#f1f5f9'), color: msg.role === 'user' ? 'white' : text, whiteSpace: 'pre-wrap' }}>{msg.content}</div></div>)}
-              {loading && <div style={{ padding: '1rem', color: textSecondary, fontStyle: 'italic' }}>{t.loading}</div>}
-            </div>
-            <div style={{ padding: '1.5rem', borderTop: `1px solid ${border}`, background: surface }}>
-              <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', gap: '0.75rem' }}>
-                <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder={t.placeholder} style={{ flex: 1, padding: '1rem', borderRadius: 12, border: `1px solid ${border}`, background: isDark ? '#1e293b' : '#fff', color: text, resize: 'none' }} rows={2} />
-                <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ padding: '1rem 2rem', borderRadius: 12, background: loading || !input.trim() ? '#999' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)', color: 'white', border: 'none', cursor: loading || !input.trim() ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: '1.5rem' }}>➤</button>
+      return (
+        <div style={{ 
+          background: bg, 
+          height: '100vh', 
+          color: text, 
+          display: 'flex', 
+          flexDirection: 'column' 
+        }}>
+          {/* Модальные окна */}
+          <Modal 
+            isOpen={showAbout} 
+            onClose={() => setShowAbout(false)} 
+            title={t.aboutTitle} 
+            content={t.aboutText} 
+            isDark={isDark} 
+          />
+          <Modal 
+            isOpen={showPolicy} 
+            onClose={() => setShowPolicy(false)} 
+            title={t.policyTitle} 
+            content={t.policyText} 
+            isDark={isDark} 
+          />
+
+          {/* Шапка */}
+          <header style={{ 
+            padding: '1rem 1.5rem', 
+            borderBottom: `1px solid ${border}`, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            background: surface 
+          }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button 
+                onClick={() => setSidebarOpen(!sidebarOpen)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: text, 
+                  cursor: 'pointer', 
+                  fontSize: '1.5rem',
+                  padding: '0.5rem'
+                }}
+              >
+                ☰
+              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <div style={{ 
+                  width: 40, 
+                  height: 40, 
+                  background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
+                  borderRadius: 10, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: 'white', 
+                  fontWeight: 'bold',
+                  fontSize: '1.2rem'
+                }}>
+                  AI
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{t.title}</div>
+                  <div style={{ fontSize: '0.75rem', color: textSecondary }}>{t.subtitle}</div>
+                </div>
               </div>
             </div>
-          </main>
-        </div>
-        <footer style={{ padding: '1rem', textAlign: 'center', borderTop: `1px solid ${border}`, background: surface, fontSize: '0.85rem', color: textSecondary }}>
-          <div style={{ marginBottom: '0.5rem' }}>
-            <button onClick={() => setShowAbout(true)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', marginRight: '1.5rem' }}>{t.about}</button>
-            <button onClick={() => setShowPolicy(true)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer' }}>{t.policy}</button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <select 
+                value={locale} 
+                onChange={(e) => changeLocale(e.target.value)} 
+                style={{ 
+                  padding: '0.5rem', 
+                  borderRadius: 8, 
+                  border: `1px solid ${border}`, 
+                  background: surface, 
+                  color: text, 
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {Object.values(LOCALES).map(loc => (
+                  <option key={loc.code} value={loc.code}>
+                    {loc.flag} {loc.name}
+                  </option>
+                ))}
+              </select>
+              <button 
+                onClick={toggleTheme} 
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: 8, 
+                  border: `1px solid ${border}`, 
+                  background: surface, 
+                  cursor: 'pointer',
+                  fontSize: '1.2rem'
+                }}
+              >
+                {isDark ? '☀️' : '🌙'}
+              </button>
+            </div>
+          </header>
+
+          {/* Основная часть */}
+          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            {/* Боковая панель */}
+            {sidebarOpen && (
+              <aside style={{ 
+                width: 280, 
+                background: surface, 
+                borderRight: `1px solid ${border}`, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                padding: '1rem' 
+              }}>
+                <button 
+                  onClick={createNewChat} 
+                  style={{ 
+                    padding: '0.75rem', 
+                    borderRadius: 8, 
+                    background: '#3b82f6', 
+                    color: 'white', 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    fontWeight: 600, 
+                    marginBottom: '1rem',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  + {t.newChat}
+                </button>
+                
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: 600, 
+                  color: textSecondary, 
+                  marginBottom: '0.5rem', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {t.chatHistory}
+                </div>
+                
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  {chats.length === 0 ? (
+                    <div style={{ 
+                      textAlign: 'center', 
+                      padding: '2rem 1rem', 
+                      color: textSecondary 
+                    }}>
+                      {t.noChats}
+                    </div>
+                  ) : (
+                    chats.map(chat => (
+                      <div 
+                        key={chat.id} 
+                        style={{ 
+                          display: 'flex', 
+                          gap: '0.5rem', 
+                          padding: '0.75rem', 
+                          marginBottom: '0.5rem', 
+                          borderRadius: 8, 
+                          background: currentChatId === chat.id 
+                            ? (isDark ? '#334155' : '#f1f5f9') 
+                            : 'transparent', 
+                          cursor: 'pointer',
+                          transition: 'background 0.2s'
+                        }} 
+                        onClick={() => setCurrentChatId(chat.id)}
+                      >
+                        <div style={{ 
+                          flex: 1, 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.9rem'
+                        }}>
+                          {chat.messages.length > 0 
+                            ? chat.messages[0].content.substring(0, 30) + '...' 
+                            : chat.title}
+                        </div>
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            deleteChat(chat.id); 
+                          }} 
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: '#ef4444', 
+                            cursor: 'pointer',
+                            opacity: 0.7,
+                            transition: 'opacity 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.opacity = '1'}
+                          onMouseLeave={(e) => e.target.style.opacity = '0.7'}
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </aside>
+            )}
+
+            {/* Область чата */}
+            <main style={{ 
+              flex: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              overflow: 'hidden' 
+            }}>
+              {/* Сообщения */}
+              <div 
+                ref={chatRef} 
+                style={{ 
+                  flex: 1, 
+                  overflowY: 'auto', 
+                  padding: '2rem', 
+                  maxWidth: 900, 
+                  margin: '0 auto', 
+                  width: '100%' 
+                }}
+              >
+                {(!currentChat || currentChat.messages.length === 0) && (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '4rem 2rem', 
+                    color: textSecondary 
+                  }}>
+                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🧭</div>
+                    <h2 style={{ color: text, marginBottom: '0.5rem' }}>{t.title}</h2>
+                    <p>{t.subtitle}</p>
+                  </div>
+                )}
+                
+                {currentChat?.messages.map(msg => (
+                  <div 
+                    key={msg.id} 
+                    style={{ 
+                      marginBottom: '1.5rem', 
+                      display: 'flex', 
+                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+                    }}
+                  >
+                    <div style={{ 
+                      maxWidth: '75%', 
+                      padding: '1rem 1.25rem', 
+                      borderRadius: 16, 
+                      background: msg.role === 'user' 
+                        ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' 
+                        : (isDark ? '#1e293b' : '#f1f5f9'), 
+                      color: msg.role === 'user' ? 'white' : text, 
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: 1.5
+                    }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                
+                {loading && (
+                  <div style={{ 
+                    padding: '1rem', 
+                    color: textSecondary, 
+                    fontStyle: 'italic' 
+                  }}>
+                    {t.loading}
+                  </div>
+                )}
+              </div>
+
+              {/* Поле ввода */}
+              <div style={{ 
+                padding: '1.5rem', 
+                borderTop: `1px solid ${border}`, 
+                background: surface 
+              }}>
+                <div style={{ 
+                  maxWidth: 900, 
+                  margin: '0 auto', 
+                  display: 'flex', 
+                  gap: '0.75rem' 
+                }}>
+                  <textarea 
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)} 
+                    onKeyPress={(e) => { 
+                      if (e.key === 'Enter' && !e.shiftKey) { 
+                        e.preventDefault(); 
+                        sendMessage(); 
+                      } 
+                    }} 
+                    placeholder={t.placeholder} 
+                    style={{ 
+                      flex: 1, 
+                      padding: '1rem', 
+                      borderRadius: 12, 
+                      border: `1px solid ${border}`, 
+                      background: isDark ? '#1e293b' : '#fff', 
+                      color: text, 
+                      resize: 'none',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit'
+                    }} 
+                    rows={2} 
+                  />
+                  <button 
+                    onClick={sendMessage} 
+                    disabled={loading || !input.trim()} 
+                    style={{ 
+                      padding: '1rem 2rem', 
+                      borderRadius: 12, 
+                      background: loading || !input.trim() 
+                        ? '#999' 
+                        : 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
+                      color: 'white', 
+                      border: 'none', 
+                      cursor: loading || !input.trim() ? 'not-allowed' : 'pointer', 
+                      fontWeight: 600, 
+                      fontSize: '1.5rem',
+                      transition: 'opacity 0.2s'
+                    }}
+                  >
+                    ➤
+                  </button>
+                </div>
+              </div>
+            </main>
           </div>
-          <div>© 2024 AI Navigator — {t.copyright}</div>
-        </footer>
-      </div>);
+
+          {/* Футер */}
+          <footer style={{ 
+            padding: '1rem', 
+            textAlign: 'center', 
+            borderTop: `1px solid ${border}`, 
+            background: surface, 
+            fontSize: '0.85rem', 
+            color: textSecondary 
+          }}>
+            <div style={{ marginBottom: '0.5rem' }}>
+              <button 
+                onClick={() => setShowAbout(true)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#3b82f6', 
+                  cursor: 'pointer', 
+                  marginRight: '1.5rem',
+                  textDecoration: 'underline'
+                }}
+              >
+                {t.about}
+              </button>
+              <button 
+                onClick={() => setShowPolicy(true)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#3b82f6', 
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                {t.policy}
+              </button>
+            </div>
+            <div>© 2024 AI Navigator — {t.copyright}</div>
+          </footer>
+        </div>
+      );
     }
 
+    // Рендер приложения
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
