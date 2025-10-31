@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Navigator - Навигатор по образованию</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -219,7 +222,8 @@
           messages: [],
           createdAt: new Date().toISOString()
         };
-        saveChats([newChat, ...chats]);
+        const updatedChats = [newChat, ...chats];
+        saveChats(updatedChats);
         setCurrentChatId(newChat.id);
         return newChat.id;
       };
@@ -237,43 +241,58 @@
       const sendMessage = async () => {
         if (!input.trim() || loading) return;
 
+        const userMsg = input.trim();
+        setInput('');
+        setLoading(true);
+
+        // Определяем ID чата
         let chatId = currentChatId;
         if (!chatId) {
           chatId = createNewChat();
         }
 
-        const userMsg = input.trim();
-        setInput('');
-
-        // Добавляем сообщение пользователя
+        // Создаем сообщение пользователя
         const newUserMsg = { 
           role: 'user', 
           content: userMsg, 
           id: Date.now() 
         };
-        
-        // Обновляем чаты с новым сообщением пользователя
-        const updatedChatsWithUser = chats.map(chat => 
-          chat.id === chatId 
-            ? { ...chat, messages: [...chat.messages, newUserMsg] }
-            : chat
-        );
-        saveChats(updatedChatsWithUser);
-
-        setLoading(true);
 
         try {
-          // Получаем ОБНОВЛЕННУЮ историю (с новым сообщением пользователя)
-          const currentChat = updatedChatsWithUser.find(c => c.id === chatId);
-          const history = currentChat ? currentChat.messages : [];
+          // Получаем текущий чат
+          const currentChat = chats.find(c => c.id === chatId);
+          const currentMessages = currentChat ? currentChat.messages : [];
+          
+          // Формируем обновленную историю с новым сообщением
+          const updatedMessages = [...currentMessages, newUserMsg];
+          
+          // Обновляем состояние чатов
+          const updatedChats = chats.map(chat => 
+            chat.id === chatId 
+              ? { ...chat, messages: updatedMessages }
+              : chat
+          );
+          
+          // Если чат был только что создан, добавляем его
+          if (!currentChat) {
+            const newChatData = {
+              id: chatId,
+              title: `${t.newChat} ${chats.length + 1}`,
+              messages: updatedMessages,
+              createdAt: new Date().toISOString()
+            };
+            updatedChats.push(newChatData);
+          }
+          
+          saveChats(updatedChats);
 
           console.log('📤 Отправка запроса...', { 
             chatId, 
-            historyLength: history.length,
-            lastMessage: history[history.length - 1]?.content?.substring(0, 50)
+            messagesCount: updatedMessages.length,
+            lastMessage: updatedMessages[updatedMessages.length - 1].content.substring(0, 50)
           });
 
-          // Отправляем запрос
+          // Отправляем запрос с ОБНОВЛЕННОЙ историей
           const res = await fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -282,19 +301,26 @@
             body: JSON.stringify({
               message: userMsg,
               chatId: chatId,
-              history: history
+              history: updatedMessages
             })
           });
 
           console.log('📥 Статус ответа:', res.status);
 
           if (!res.ok) {
-            const errorData = await res.json();
+            const errorData = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
             throw new Error(errorData.error || `HTTP ${res.status}`);
           }
 
           const data = await res.json();
-          console.log('✅ Получен ответ, длина:', data.reply?.length);
+          console.log('✅ Получен ответ:', {
+            length: data.reply?.length,
+            preview: data.reply?.substring(0, 100)
+          });
+
+          if (!data.reply) {
+            throw new Error('Пустой ответ от сервера');
+          }
 
           // Добавляем ответ AI
           const aiMsg = {
@@ -303,12 +329,14 @@
             id: Date.now() + 1
           };
 
-          const updatedChatsWithAI = updatedChatsWithUser.map(chat => 
+          const finalChats = updatedChats.map(chat => 
             chat.id === chatId 
               ? { ...chat, messages: [...chat.messages, aiMsg] }
               : chat
           );
-          saveChats(updatedChatsWithAI);
+          
+          console.log('💾 Сохраняем ответ AI');
+          saveChats(finalChats);
 
         } catch (error) {
           console.error('❌ Ошибка:', error);
@@ -320,12 +348,13 @@
             id: Date.now() + 1
           };
 
-          const updatedChatsWithError = updatedChatsWithUser.map(chat => 
+          const errorChats = chats.map(chat => 
             chat.id === chatId 
-              ? { ...chat, messages: [...chat.messages, errorMsg] }
+              ? { ...chat, messages: [...chat.messages, newUserMsg, errorMsg] }
               : chat
           );
-          saveChats(updatedChatsWithError);
+          
+          saveChats(errorChats);
         } finally {
           setLoading(false);
         }
@@ -724,6 +753,9 @@
               </button>
             </div>
             <div>© 2024 AI Navigator — {t.copyright}</div>
+            <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.25rem' }}>
+              v3.0 (исправлено)
+            </div>
           </footer>
         </div>
       );
