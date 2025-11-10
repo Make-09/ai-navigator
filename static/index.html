@@ -5,63 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Navigator - Навигатор по образованию</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
-    #root { width: 100%; height: 100vh; position: relative; }
-    
-    /* Анимированный фон */
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    
-    .background-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e3a5f);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-      z-index: -2;
-    }
-    
-    .background-overlay-light {
-      background: linear-gradient(-45deg, #f8fafc, #e0f2fe, #dbeafe, #bfdbfe);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-    }
-    
-    /* Компас */
-    .compass {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 500px;
-      height: 500px;
-      opacity: 0.05;
-      z-index: -1;
-      pointer-events: none;
-      animation: rotate 60s linear infinite;
-    }
-    
-    @keyframes rotate {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    
-    .compass svg {
-      width: 100%;
-      height: 100%;
-    }
-    
+    #root { width: 100%; height: 100vh; }
     .modal-overlay { 
       position: fixed; 
       top: 0; 
@@ -75,26 +27,9 @@
       z-index: 1000;
       animation: fadeIn 0.2s;
     }
-    
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
-    }
-    
-    /* Улучшенные стили для сообщений */
-    .message-bubble {
-      animation: slideIn 0.3s ease-out;
-    }
-    
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
   </style>
 </head>
@@ -103,14 +38,15 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
     
+    // Переводы для всех языков
     const LOCALES = {
       ru: { 
         code: "ru", 
         name: "Русский", 
         flag: "🇷🇺", 
         strings: { 
-          title: "AI Life Path Navigator", 
-          subtitle: "Ваш персональный AI-наставник по образованию и карьере", 
+          title: "AI Navigator", 
+          subtitle: "AI-наставник по образованию и карьере", 
           placeholder: "Напишите ваш вопрос...", 
           loading: "AI думает...", 
           error: "Ошибка", 
@@ -132,8 +68,8 @@
         name: "English", 
         flag: "🇬🇧", 
         strings: { 
-          title: "AI Life Path Navigator", 
-          subtitle: "Your personal AI mentor for education and career", 
+          title: "AI Navigator", 
+          subtitle: "AI mentor for education and career", 
           placeholder: "Write your question...", 
           loading: "AI is thinking...", 
           error: "Error", 
@@ -155,8 +91,8 @@
         name: "Қазақша", 
         flag: "🇰🇿", 
         strings: { 
-          title: "AI Life Path Navigator", 
-          subtitle: "Білім және мансап бойынша жеке AI-кеңесші", 
+          title: "AI Navigator", 
+          subtitle: "Білім және мансап бойынша AI-кеңесші", 
           placeholder: "Сұрағыңызды жазыңыз...", 
           loading: "AI ойлануда...", 
           error: "Қате", 
@@ -175,6 +111,7 @@
       }
     };
 
+    // Компонент модального окна
     function Modal({ isOpen, onClose, title, content, isDark }) {
       if (!isOpen) return null;
       
@@ -223,9 +160,10 @@
       );
     }
 
+    // Главный компонент приложения
     function App() {
       const [locale, setLocale] = useState('ru');
-      const [theme, setTheme] = useState('dark');
+      const [theme, setTheme] = useState('light');
       const [chats, setChats] = useState([]);
       const [currentChatId, setCurrentChatId] = useState(null);
       const [input, setInput] = useState('');
@@ -237,8 +175,9 @@
       
       const t = LOCALES[locale].strings;
 
+      // Загрузка данных при старте
       useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
         const savedLocale = localStorage.getItem('locale') || 'ru';
         const savedChats = localStorage.getItem('chats');
         
@@ -258,12 +197,14 @@
         }
       }, []);
 
+      // Автоскролл при новых сообщениях
       useEffect(() => {
         if (chatRef.current) {
           chatRef.current.scrollTop = chatRef.current.scrollHeight;
         }
       }, [chats, currentChatId]);
 
+      // Сохранение чатов
       const saveChats = (updatedChats) => {
         try {
           localStorage.setItem('chats', JSON.stringify(updatedChats));
@@ -273,6 +214,7 @@
         }
       };
 
+      // Создание нового чата
       const createNewChat = () => {
         const newChat = {
           id: Date.now(),
@@ -286,6 +228,7 @@
         return newChat.id;
       };
 
+      // Удаление чата
       const deleteChat = (chatId) => {
         const updatedChats = chats.filter(c => c.id !== chatId);
         saveChats(updatedChats);
@@ -294,6 +237,7 @@
         }
       };
 
+      // Отправка сообщения
       const sendMessage = async () => {
         if (!input.trim() || loading) return;
 
@@ -301,11 +245,13 @@
         setInput('');
         setLoading(true);
 
+        // Определяем ID чата
         let chatId = currentChatId;
         if (!chatId) {
           chatId = createNewChat();
         }
 
+        // Создаем сообщение пользователя
         const newUserMsg = { 
           role: 'user', 
           content: userMsg, 
@@ -313,16 +259,21 @@
         };
 
         try {
+          // Получаем текущий чат
           const currentChat = chats.find(c => c.id === chatId);
           const currentMessages = currentChat ? currentChat.messages : [];
+          
+          // Формируем обновленную историю с новым сообщением
           const updatedMessages = [...currentMessages, newUserMsg];
           
+          // Обновляем состояние чатов
           const updatedChats = chats.map(chat => 
             chat.id === chatId 
               ? { ...chat, messages: updatedMessages }
               : chat
           );
           
+          // Если чат был только что создан, добавляем его
           if (!currentChat) {
             const newChatData = {
               id: chatId,
@@ -335,6 +286,13 @@
           
           saveChats(updatedChats);
 
+          console.log('📤 Отправка запроса...', { 
+            chatId, 
+            messagesCount: updatedMessages.length,
+            lastMessage: updatedMessages[updatedMessages.length - 1].content.substring(0, 50)
+          });
+
+          // Отправляем запрос с ОБНОВЛЕННОЙ историей
           const res = await fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -347,17 +305,24 @@
             })
           });
 
+          console.log('📥 Статус ответа:', res.status);
+
           if (!res.ok) {
             const errorData = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
             throw new Error(errorData.error || `HTTP ${res.status}`);
           }
 
           const data = await res.json();
+          console.log('✅ Получен ответ:', {
+            length: data.reply?.length,
+            preview: data.reply?.substring(0, 100)
+          });
 
           if (!data.reply) {
             throw new Error('Пустой ответ от сервера');
           }
 
+          // Добавляем ответ AI
           const aiMsg = {
             role: 'assistant',
             content: data.reply,
@@ -370,11 +335,13 @@
               : chat
           );
           
+          console.log('💾 Сохраняем ответ AI');
           saveChats(finalChats);
 
         } catch (error) {
           console.error('❌ Ошибка:', error);
           
+          // Показываем ошибку в чате
           const errorMsg = {
             role: 'assistant',
             content: `${t.error}: ${error.message}`,
@@ -393,351 +360,410 @@
         }
       };
 
+      // Переключение темы
       const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
         localStorage.setItem('theme', newTheme);
       };
 
+      // Смена языка
       const changeLocale = (newLocale) => {
         setLocale(newLocale);
         localStorage.setItem('locale', newLocale);
       };
 
+      // Цветовая схема
       const isDark = theme === 'dark';
-      const surface = isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+      const bg = isDark ? '#0f172a' : '#f8fafc';
+      const surface = isDark ? '#1e293b' : '#fff';
       const text = isDark ? '#e2e8f0' : '#0f172a';
       const textSecondary = isDark ? '#94a3b8' : '#64748b';
-      const border = isDark ? 'rgba(51, 65, 85, 0.6)' : 'rgba(226, 232, 240, 0.6)';
+      const border = isDark ? '#334155' : '#e2e8f0';
       
       const currentChat = chats.find(c => c.id === currentChatId);
 
       return (
-        <>
-          {/* Анимированный фон */}
-          <div className={`background-overlay ${!isDark ? 'background-overlay-light' : ''}`}></div>
-          
-          {/* Анимированный компас */}
-          <div className="compass">
-            <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="48" stroke={isDark ? "#38bdf8" : "#3b82f6"} strokeWidth="2" fill="none" />
-              <polygon points="50,10 58,50 50,90 42,50" fill={isDark ? "#38bdf8" : "#3b82f6"} />
-            </svg>
-          </div>
+        <div style={{ 
+          background: bg, 
+          height: '100vh', 
+          color: text, 
+          display: 'flex', 
+          flexDirection: 'column' 
+        }}>
+          {/* Модальные окна */}
+          <Modal 
+            isOpen={showAbout} 
+            onClose={() => setShowAbout(false)} 
+            title={t.aboutTitle} 
+            content={t.aboutText} 
+            isDark={isDark} 
+          />
+          <Modal 
+            isOpen={showPolicy} 
+            onClose={() => setShowPolicy(false)} 
+            title={t.policyTitle} 
+            content={t.policyText} 
+            isDark={isDark} 
+          />
 
-          <div style={{ 
-            height: '100vh', 
-            color: text, 
+          {/* Шапка */}
+          <header style={{ 
+            padding: '1rem 1.5rem', 
+            borderBottom: `1px solid ${border}`, 
             display: 'flex', 
-            flexDirection: 'column',
-            position: 'relative',
-            zIndex: 1
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            background: surface 
           }}>
-            <Modal 
-              isOpen={showAbout} 
-              onClose={() => setShowAbout(false)} 
-              title={t.aboutTitle} 
-              content={t.aboutText} 
-              isDark={isDark} 
-            />
-            <Modal 
-              isOpen={showPolicy} 
-              onClose={() => setShowPolicy(false)} 
-              title={t.policyTitle} 
-              content={t.policyText} 
-              isDark={isDark} 
-            />
-
-            {/* Шапка */}
-            <header style={{ 
-              padding: '1rem 1.5rem', 
-              borderBottom: `1px solid ${border}`, 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              background: surface,
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <button 
-                  onClick={() => setSidebarOpen(!sidebarOpen)} 
-                  style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    color: text, 
-                    cursor: 'pointer', 
-                    fontSize: '1.5rem',
-                    padding: '0.5rem'
-                  }}
-                >
-                  ☰
-                </button>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <div style={{ fontSize: '2rem' }}>🧭</div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{t.title}</div>
-                    <div style={{ fontSize: '0.75rem', color: textSecondary }}>{t.subtitle}</div>
-                  </div>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button 
+                onClick={() => setSidebarOpen(!sidebarOpen)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: text, 
+                  cursor: 'pointer', 
+                  fontSize: '1.5rem',
+                  padding: '0.5rem'
+                }}
+              >
+                ☰
+              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <div style={{ 
+                  width: 40, 
+                  height: 40, 
+                  background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
+                  borderRadius: 10, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: 'white', 
+                  fontWeight: 'bold',
+                  fontSize: '1.2rem'
+                }}>
+                  AI
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{t.title}</div>
+                  <div style={{ fontSize: '0.75rem', color: textSecondary }}>{t.subtitle}</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <select 
-                  value={locale} 
-                  onChange={(e) => changeLocale(e.target.value)} 
-                  style={{ 
-                    padding: '0.5rem', 
-                    borderRadius: 8, 
-                    border: `1px solid ${border}`, 
-                    background: surface, 
-                    color: text, 
-                    cursor: 'pointer',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  {Object.values(LOCALES).map(loc => (
-                    <option key={loc.code} value={loc.code}>
-                      {loc.flag} {loc.name}
-                    </option>
-                  ))}
-                </select>
-                <button 
-                  onClick={toggleTheme} 
-                  style={{ 
-                    padding: '0.5rem 1rem', 
-                    borderRadius: 8, 
-                    border: `1px solid ${border}`, 
-                    background: surface, 
-                    cursor: 'pointer',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  {isDark ? '☀️' : '🌙'}
-                </button>
-              </div>
-            </header>
-
-            {/* Основная часть */}
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-              {/* Боковая панель */}
-              {sidebarOpen && (
-                <aside style={{ 
-                  width: 280, 
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <select 
+                value={locale} 
+                onChange={(e) => changeLocale(e.target.value)} 
+                style={{ 
+                  padding: '0.5rem', 
+                  borderRadius: 8, 
+                  border: `1px solid ${border}`, 
                   background: surface, 
-                  backdropFilter: 'blur(10px)',
-                  borderRight: `1px solid ${border}`, 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  padding: '1rem' 
-                }}>
-                  <button 
-                    onClick={createNewChat} 
-                    style={{ 
-                      padding: '0.75rem', 
-                      borderRadius: 8, 
-                      background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
-                      color: 'white', 
-                      border: 'none', 
-                      cursor: 'pointer', 
-                      fontWeight: 600, 
-                      marginBottom: '1rem',
-                      fontSize: '0.95rem'
-                    }}
-                  >
-                    + {t.newChat}
-                  </button>
-                  
-                  <div style={{ 
-                    fontSize: '0.75rem', 
-                    fontWeight: 600, 
-                    color: textSecondary, 
-                    marginBottom: '0.5rem', 
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {t.chatHistory}
-                  </div>
-                  
-                  <div style={{ flex: 1, overflowY: 'auto' }}>
-                    {chats.length === 0 ? (
-                      <div style={{ 
-                        textAlign: 'center', 
-                        padding: '2rem 1rem', 
-                        color: textSecondary 
-                      }}>
-                        {t.noChats}
-                      </div>
-                    ) : (
-                      chats.map(chat => (
-                        <div 
-                          key={chat.id} 
-                          style={{ 
-                            display: 'flex', 
-                            gap: '0.5rem', 
-                            padding: '0.75rem', 
-                            marginBottom: '0.5rem', 
-                            borderRadius: 8, 
-                            background: currentChatId === chat.id 
-                              ? (isDark ? 'rgba(51, 65, 85, 0.8)' : 'rgba(241, 245, 249, 0.8)') 
-                              : 'transparent', 
-                            cursor: 'pointer',
-                            transition: 'background 0.2s'
-                          }} 
-                          onClick={() => setCurrentChatId(chat.id)}
-                        >
-                          <div style={{ 
-                            flex: 1, 
-                            overflow: 'hidden', 
-                            textOverflow: 'ellipsis', 
-                            whiteSpace: 'nowrap',
-                            fontSize: '0.9rem'
-                          }}>
-                            {chat.messages.length > 0 
-                              ? chat.messages[0].content.substring(0, 30) + '...' 
-                              : chat.title}
-                          </div>
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              deleteChat(chat.id); 
-                            }} 
-                            style={{ 
-                              background: 'none', 
-                              border: 'none', 
-                              color: '#ef4444', 
-                              cursor: 'pointer',
-                              opacity: 0.7,
-                              transition: 'opacity 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.target.style.opacity = '1'}
-                            onMouseLeave={(e) => e.target.style.opacity = '0.7'}
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </aside>
-              )}
+                  color: text, 
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {Object.values(LOCALES).map(loc => (
+                  <option key={loc.code} value={loc.code}>
+                    {loc.flag} {loc.name}
+                  </option>
+                ))}
+              </select>
+              <button 
+                onClick={toggleTheme} 
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: 8, 
+                  border: `1px solid ${border}`, 
+                  background: surface, 
+                  cursor: 'pointer',
+                  fontSize: '1.2rem'
+                }}
+              >
+                {isDark ? '☀️' : '🌙'}
+              </button>
+            </div>
+          </header>
 
-              {/* Область чата */}
-              <main style={{ 
-                flex: 1, 
+          {/* Основная часть */}
+          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            {/* Боковая панель */}
+            {sidebarOpen && (
+              <aside style={{ 
+                width: 280, 
+                background: surface, 
+                borderRight: `1px solid ${border}`, 
                 display: 'flex', 
                 flexDirection: 'column', 
-                overflow: 'hidden' 
+                padding: '1rem' 
               }}>
-                {/* Сообщения */}
-                <div 
-                  ref={chatRef} 
+                <button 
+                  onClick={createNewChat} 
                   style={{ 
-                    flex: 1, 
-                    overflowY: 'auto', 
-                    padding: '2rem', 
-                    maxWidth: 900, 
-                    margin: '0 auto', 
-                    width: '100%' 
+                    padding: '0.75rem', 
+                    borderRadius: 8, 
+                    background: '#3b82f6', 
+                    color: 'white', 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    fontWeight: 600, 
+                    marginBottom: '1rem',
+                    fontSize: '0.95rem'
                   }}
                 >
-                  {(!currentChat || currentChat.messages.length === 0) && (
+                  + {t.newChat}
+                </button>
+                
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: 600, 
+                  color: textSecondary, 
+                  marginBottom: '0.5rem', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {t.chatHistory}
+                </div>
+                
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  {chats.length === 0 ? (
                     <div style={{ 
                       textAlign: 'center', 
-                      padding: '4rem 2rem', 
+                      padding: '2rem 1rem', 
                       color: textSecondary 
                     }}>
-                      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🧭</div>
-                      <h2 style={{ color: text, marginBottom: '0.5rem' }}>{t.title}</h2>
-                      <p>{t.subtitle}</p>
+                      {t.noChats}
                     </div>
-                  )}
-                  
-                  {currentChat?.messages.map(msg => (
-                    <div 
-                      key={msg.id} 
-                      className="message-bubble"
-                      style={{ 
-                        marginBottom: '1.5rem', 
-                        display: 'flex', 
-                        justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' 
-                      }}
-                    >
-                      <div style={{ 
-                        maxWidth: '75%', 
-                        padding: '1rem 1.25rem', 
-                        borderRadius: 16, 
-                        background: msg.role === 'user' 
-                          ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' 
-                          : (isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(241, 245, 249, 0.8)'), 
-                        color: msg.role === 'user' ? 'white' : text, 
-                        whiteSpace: 'pre-wrap',
-                        lineHeight: 1.5,
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                      }}>
-                        {msg.content}
+                  ) : (
+                    chats.map(chat => (
+                      <div 
+                        key={chat.id} 
+                        style={{ 
+                          display: 'flex', 
+                          gap: '0.5rem', 
+                          padding: '0.75rem', 
+                          marginBottom: '0.5rem', 
+                          borderRadius: 8, 
+                          background: currentChatId === chat.id 
+                            ? (isDark ? '#334155' : '#f1f5f9') 
+                            : 'transparent', 
+                          cursor: 'pointer',
+                          transition: 'background 0.2s'
+                        }} 
+                        onClick={() => setCurrentChatId(chat.id)}
+                      >
+                        <div style={{ 
+                          flex: 1, 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.9rem'
+                        }}>
+                          {chat.messages.length > 0 
+                            ? chat.messages[0].content.substring(0, 30) + '...' 
+                            : chat.title}
+                        </div>
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            deleteChat(chat.id); 
+                          }} 
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: '#ef4444', 
+                            cursor: 'pointer',
+                            opacity: 0.7,
+                            transition: 'opacity 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.opacity = '1'}
+                          onMouseLeave={(e) => e.target.style.opacity = '0.7'}
+                        >
+                          🗑️
+                        </button>
                       </div>
-                    </div>
-                  ))}
-                  
-                  {loading && (
-                    <div style={{ 
-                      padding: '1rem', 
-                      color: textSecondary, 
-                      fontStyle: 'italic' 
-                    }}>
-                      {t.loading}
-                    </div>
+                    ))
                   )}
                 </div>
+              </aside>
+            )}
 
-                {/* Поле ввода */}
-                <div style={{ 
-                  padding: '1.5rem', 
-                  borderTop: `1px solid ${border}`, 
-                  background: surface,
-                  backdropFilter: 'blur(10px)'
-                }}>
+            {/* Область чата */}
+            <main style={{ 
+              flex: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              overflow: 'hidden' 
+            }}>
+              {/* Сообщения */}
+              <div 
+                ref={chatRef} 
+                style={{ 
+                  flex: 1, 
+                  overflowY: 'auto', 
+                  padding: '2rem', 
+                  maxWidth: 900, 
+                  margin: '0 auto', 
+                  width: '100%' 
+                }}
+              >
+                {(!currentChat || currentChat.messages.length === 0) && (
                   <div style={{ 
-                    maxWidth: 900, 
-                    margin: '0 auto', 
-                    display: 'flex', 
-                    gap: '0.75rem' 
+                    textAlign: 'center', 
+                    padding: '4rem 2rem', 
+                    color: textSecondary 
                   }}>
-                    <textarea 
-                      value={input} 
-                      onChange={(e) => setInput(e.target.value)} 
-                      onKeyPress={(e) => { 
-                        if (e.key === 'Enter' && !e.shiftKey) { 
-                          e.preventDefault(); 
-                          sendMessage(); 
-                        } 
-                      }} 
-                      placeholder={t.placeholder} 
-                      style={{ 
-                        flex: 1, 
-                        padding: '1rem', 
-                        borderRadius: 12, 
-                        border: `1px solid ${border}`, 
-                        background: isDark ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.6)', 
-                        color: text, 
-                        resize: 'none',
-                        fontSize: '1rem',
-                        fontFamily: 'inherit'
-                      }} 
-                      rows={2} 
-                    />
-                    <button 
-                      onClick={sendMessage} 
-                      disabled={loading || !input.trim()} 
-                      style={{ 
-                        padding: '1rem 2rem', 
-                        borderRadius: 12, 
-                        background: loading || !input.trim() 
-                          ? '#999' 
-                          : 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
-                        color: 'white', 
-                        border: 'none', 
-                        cursor: loading || !input.trim() ? 'not-allowed' : 'pointer', 
-                        fontWeight: 600, 
-                        fontSize: '1.5rem',
-                        transition: 'opacity 0.
+                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🧭</div>
+                    <h2 style={{ color: text, marginBottom: '0.5rem' }}>{t.title}</h2>
+                    <p>{t.subtitle}</p>
+                  </div>
+                )}
+                
+                {currentChat?.messages.map(msg => (
+                  <div 
+                    key={msg.id} 
+                    style={{ 
+                      marginBottom: '1.5rem', 
+                      display: 'flex', 
+                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+                    }}
+                  >
+                    <div style={{ 
+                      maxWidth: '75%', 
+                      padding: '1rem 1.25rem', 
+                      borderRadius: 16, 
+                      background: msg.role === 'user' 
+                        ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)' 
+                        : (isDark ? '#1e293b' : '#f1f5f9'), 
+                      color: msg.role === 'user' ? 'white' : text, 
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: 1.5
+                    }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                
+                {loading && (
+                  <div style={{ 
+                    padding: '1rem', 
+                    color: textSecondary, 
+                    fontStyle: 'italic' 
+                  }}>
+                    {t.loading}
+                  </div>
+                )}
+              </div>
+
+              {/* Поле ввода */}
+              <div style={{ 
+                padding: '1.5rem', 
+                borderTop: `1px solid ${border}`, 
+                background: surface 
+              }}>
+                <div style={{ 
+                  maxWidth: 900, 
+                  margin: '0 auto', 
+                  display: 'flex', 
+                  gap: '0.75rem' 
+                }}>
+                  <textarea 
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)} 
+                    onKeyPress={(e) => { 
+                      if (e.key === 'Enter' && !e.shiftKey) { 
+                        e.preventDefault(); 
+                        sendMessage(); 
+                      } 
+                    }} 
+                    placeholder={t.placeholder} 
+                    style={{ 
+                      flex: 1, 
+                      padding: '1rem', 
+                      borderRadius: 12, 
+                      border: `1px solid ${border}`, 
+                      background: isDark ? '#1e293b' : '#fff', 
+                      color: text, 
+                      resize: 'none',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit'
+                    }} 
+                    rows={2} 
+                  />
+                  <button 
+                    onClick={sendMessage} 
+                    disabled={loading || !input.trim()} 
+                    style={{ 
+                      padding: '1rem 2rem', 
+                      borderRadius: 12, 
+                      background: loading || !input.trim() 
+                        ? '#999' 
+                        : 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
+                      color: 'white', 
+                      border: 'none', 
+                      cursor: loading || !input.trim() ? 'not-allowed' : 'pointer', 
+                      fontWeight: 600, 
+                      fontSize: '1.5rem',
+                      transition: 'opacity 0.2s'
+                    }}
+                  >
+                    ➤
+                  </button>
+                </div>
+              </div>
+            </main>
+          </div>
+
+          {/* Футер */}
+          <footer style={{ 
+            padding: '1rem', 
+            textAlign: 'center', 
+            borderTop: `1px solid ${border}`, 
+            background: surface, 
+            fontSize: '0.85rem', 
+            color: textSecondary 
+          }}>
+            <div style={{ marginBottom: '0.5rem' }}>
+              <button 
+                onClick={() => setShowAbout(true)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#3b82f6', 
+                  cursor: 'pointer', 
+                  marginRight: '1.5rem',
+                  textDecoration: 'underline'
+                }}
+              >
+                {t.about}
+              </button>
+              <button 
+                onClick={() => setShowPolicy(true)} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#3b82f6', 
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                {t.policy}
+              </button>
+            </div>
+            <div>© 2024 AI Navigator — {t.copyright}</div>
+            <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.25rem' }}>
+              v3.0 (исправлено)
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    // Рендер приложения
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
+
